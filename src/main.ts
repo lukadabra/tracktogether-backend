@@ -23,7 +23,7 @@ server.register(fastifyPassport.initialize())
 server.register(fastifyPassport.secureSession())
 server.register(formDataPlugin);
 server.register(cors, {
-  origin: true,  // autoriser toutes les origines, ou spécifier une liste d'origines autorisées
+  origin: "http://localhost:5173",  // autoriser toutes les origines, ou spécifier une liste d'origines autorisées
 });
 
 // Routes pour l'authentification
