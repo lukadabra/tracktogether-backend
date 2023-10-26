@@ -1,46 +1,40 @@
-import fastify from 'fastify';
-import cors from "@fastify/cors";
-import formDataPlugin from "@fastify/formbody";
-import fastifySecureSession from '@fastify/secure-session';
-import { getEnv } from "./config/env/envRepository";
-import fastifyPassport from "./config/passport/passportConfig";
+import { getEnv } from "./infrastructures/env/envRepository";
 
+const express = require('express');
+const cors = require('cors');
+const session = require('express-session');
 const fs = require('fs')
 const path = require('path')
-
-// const
 const env = getEnv();
 const port = parseInt(env.port);
 
+import AuthRoutes from './infrastructures/http/routes/AuthRoutes';
+import passportSetup from './infrastructures/auth/authStrategiesConfig';
+import passport from 'passport'
+
 // setup server
-const server = fastify({
-  logger: true
-});
-// set up secure sessions for @fastify/passport to store data in
-server.register(fastifySecureSession, { key: fs.readFileSync(path.join(__dirname, 'secret-key')) })
-// initialize @fastify/passport and connect it to the secure-session storage. Note: both of these plugins are mandatory.
-server.register(fastifyPassport.initialize())
-server.register(fastifyPassport.secureSession())
-server.register(formDataPlugin);
-server.register(cors, {
-  origin: "http://localhost:5173",  // autoriser toutes les origines, ou spécifier une liste d'origines autorisées
-});
+const server = express();
 
-// Routes pour l'authentification
-server.get('/auth/deezer', fastifyPassport.authenticate('deezer'));
-server.get('/auth/deezer/callback', fastifyPassport.authenticate('deezer', { successRedirect: '/', failureRedirect: '/login' }));
+server.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }
+}));
 
-server.get('/auth/spotify', fastifyPassport.authenticate('spotify'));
-server.get('/auth/spotify/callback', fastifyPassport.authenticate('spotify', { successRedirect: '/', failureRedirect: '/login' }));
+server.use(cors({
+  origin: "http://localhost:5173",
+  methods: "GET,POST,PUT,DELETE",
+  credentials: true,
+}));
+
+server.use(passport.initialize());
+server.use(passport.session());
+
+// Configuration des routes
+server.use('/auth', AuthRoutes);
 
 
-
-(async () => {
-  await server.listen({ port }, (err, address) => {
-    if (err) {
-      console.error(err)
-      process.exit(1)
-    }
-    console.log(`Server listening at ${address}`)
-  })
-})();
+server.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})

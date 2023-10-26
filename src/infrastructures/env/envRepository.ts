@@ -9,6 +9,7 @@ export const getEnv = () => {
         SPOTIFY_CLIENT_SECRET,
         REDIRECT_URI,
         PORT,
+        SECRET_SALT,
         DEEZER_APP_ID,
         DEEZER_APP_SECRET,
         SPOTIFY_APP_ID,
@@ -16,7 +17,7 @@ export const getEnv = () => {
     } = process.env;
 
     if (!DEEZER_CLIENT_ID || !DEEZER_CLIENT_SECRET || !SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !REDIRECT_URI ||
-        !DEEZER_APP_ID || !DEEZER_APP_SECRET || !SPOTIFY_APP_ID || !SPOTIFY_APP_SECRET || !PORT) {
+        !DEEZER_APP_ID || !DEEZER_APP_SECRET || !SPOTIFY_APP_ID || !SPOTIFY_APP_SECRET || !PORT || !SECRET_SALT) {
         throw new Error('Missing required environment variable');
     }
 
@@ -34,6 +35,7 @@ export const getEnv = () => {
             appSecret: SPOTIFY_APP_SECRET
         },
         redirectUri: REDIRECT_URI,
-        port: PORT
+        port: PORT,
+        salt: SECRET_SALT
     };
 };
